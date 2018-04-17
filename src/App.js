@@ -107,13 +107,13 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Soltman's Survivor League</h1>
-          <select onChange={this.handleFilterChange}>
+        </header>
+          {this.fetchCurrentWeekSeries(this.state.filter)}
+        <select onChange={this.handleFilterChange}>
             <option value="this">This Week</option>
             <option value="last">Last Week</option>
             <option value="next">Next Week</option>
           </select>
-        </header>
-          {this.fetchCurrentWeekSeries(this.state.filter)}
         <div className='container' id="games"></div>
       </div>
     );

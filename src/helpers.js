@@ -52,7 +52,7 @@ function makeTeamSeries(teamObjects, scores) {
 
   for (let team in teamObjects) {
     let games = teamObjects[team].games
-    htmlString += `<div class="col-sm individual-team-series">${team}<div><img src="http://a.espncdn.com/combiner/i?img=/i/teamlogos/mlb/500/${teamObjects[team].abbr.toLowerCase()}.png&h=150&w=150"></div>`
+    htmlString += `<div class="col-sm individual-team-series"><span class="header">${team}</span><div><a href="http://www.espn.com/mlb/team/_/name/${teamObjects[team].abbr.toLowerCase()}" target="_blank"><img src="http://a.espncdn.com/combiner/i?img=/i/teamlogos/mlb/500/${teamObjects[team].abbr.toLowerCase()}.png&h=150&w=150"></a></div>`
 
     function homeGameClass(gameScoreObj) {
       if (gameScoreObj && gameScoreObj.homeScore) {
@@ -114,7 +114,7 @@ function processGames(games, scores) {
   let teamObjects = makeTeamObjects(games)
   let gameDivs = makeTeamSeries(teamObjects, scores)
 
-  gameDivs = `<h2>This Week's Series</h2><br /><br />${gameDivs}`
+  gameDivs = `<h2>Series For the Week</h2><br /><br />${gameDivs}`
 
   document.getElementById('games').innerHTML = gameDivs
 }
