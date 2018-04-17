@@ -9,7 +9,7 @@ class App extends Component {
     super()
 
     this.state = {
-        filter: 'this'
+        filter: 'current'
     }
 
     this.handleFilterChange = this.handleFilterChange.bind(this)
@@ -19,7 +19,7 @@ class App extends Component {
     let weekArray = []
     let currentDay = new Date(startDate)
     let today = new Date()
-    let end = week === 'this' ? today : endDate
+    let end = week === 'current' ? today : endDate
 
     while (currentDay <= end) {
       let dateString = helpers.convertDateToQueryString(currentDay)
@@ -30,10 +30,9 @@ class App extends Component {
     // let lastDay = helpers.convertDateToQueryString(endDate)
 
     // weekArray.push(lastDay)
-    if (week === 'this') {
+    if (week === 'current') {
         weekArray = weekArray.slice(0,-1)
     }
-
     return weekArray
   }
 
@@ -63,9 +62,9 @@ class App extends Component {
         window.games = games.fullgameschedule.gameentry
       })
       .then(() => {
-        let week = this.getDatesForWeek(startDate, endDate, 'last');
+        let weekDates = this.getDatesForWeek(startDate, endDate, week);
         window.scores = {};
-        let fetchThem = week.map(date => {
+        let fetchThem = weekDates.map(date => {
           return this.fetchScores(date)
         })
         let promises = Promise.all(fetchThem);
@@ -108,9 +107,9 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Soltman's Survivor League</h1>
         </header>
-          {this.fetchCurrentWeekSeries(this.state.filter)}
         <select onChange={this.handleFilterChange}>
-            <option value="this">This Week</option>
+            <option value={this.state.filter}>Select a Week</option>
+            <option value="current">This Week</option>
             <option value="last">Last Week</option>
             <option value="next">Next Week</option>
           </select>
