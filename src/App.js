@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {helpers} from './helpers'
 import {API_PASSWORD} from './secrets'
-import SeriesContainer from './SeriesContainer'
+import GamesContainer from './GamesContainer'
 import './App.css';
 
 class App extends Component {
@@ -11,7 +11,7 @@ class App extends Component {
         <header className="App-header">
           <h1 className="App-title">Soltman's Survivor League</h1>
         </header>
-        <SeriesContainer />
+        <GamesContainer />
         <div className='container' id="games"></div>
       </div>
     );
