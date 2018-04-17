@@ -1,10 +1,10 @@
 function determineStartOfWeek(today) {
   let day = today
-  
+
   while (day.getDay() !== 1) {
     day = new Date(day.getTime() - 86400000);
   }
-  
+
   return day
 }
 
@@ -18,11 +18,11 @@ function convertDateToQueryString(dateToConvert) {
 
 function determineEndOfWeek(today) {
   let day = today
-  
+
   while (day.getDay() !== 0) {
     day = new Date(day.getTime() + 86400000);
   }
-  
+
   return day
 }
 
@@ -53,9 +53,9 @@ function makeTeamSeries(teamObjects, scores) {
   for (let team in teamObjects) {
     let games = teamObjects[team].games
     htmlString += `<div class="col-sm individual-team-series">${team}<div><img src="http://a.espncdn.com/combiner/i?img=/i/teamlogos/mlb/500/${teamObjects[team].abbr.toLowerCase()}.png&h=150&w=150"></div>`
-    
+
     function homeGameClass(gameScoreObj) {
-      if (gameScoreObj) {
+      if (gameScoreObj && gameScoreObj.homeScore) {
         if (gameScoreObj.awayScore < gameScoreObj.homeScore) {
           return 'home-game win'
         } else {
@@ -67,7 +67,7 @@ function makeTeamSeries(teamObjects, scores) {
     }
 
     function awayGameClass(gameScoreObj) {
-      if (gameScoreObj) {
+      if (gameScoreObj && gameScoreObj.awayScore) {
         if (gameScoreObj.homeScore < gameScoreObj.awayScore) {
           return 'away-game win'
         } else {
@@ -80,17 +80,19 @@ function makeTeamSeries(teamObjects, scores) {
 
     games = games.map(game => {
       if (game.homeTeam.Name === team) {
-        let str = `<div id=${game.id} class="${homeGameClass(scores[game.id])}">vs ${game.awayTeam.Name}`
-        if (scores[game.id]) {
-          str += ` (${scores[game.id].awayScore || 0} - ${scores[game.id].homeScore || 0})</div>`
+        let str = `<div id=${game.id} class="${homeGameClass(scores[game.id])}"><span class='small'>(${game.date.split('-').slice(1).join('/')})</span> vs ${game.awayTeam.Name}`
+        if (scores[game.id] && scores[game.id].homeScore) {
+          str += ` <span class='small'>(${scores[game.id].awayScore || 0} - ${scores[game.id].homeScore || 0})</span></div>`
+        } else if (game.scheduleStatus === 'Postponed') {
+            str += ` <span class='small'>(PDP)</span></div>`
         } else {
-          str += '</div>'
+          str += `</div>`
         }
         return str
       } else {
-        let str = `<div id=${game.id} class="${awayGameClass(scores[game.id])}">vs ${game.homeTeam.Name}`
-        if (scores[game.id]) {
-          str += ` (${scores[game.id].awayScore || 0} - ${scores[game.id].homeScore || 0})</div>`
+        let str = `<div id=${game.id} class="${awayGameClass(scores[game.id])}"><span class='small'>(${game.date.split('-').slice(1).join('/')})</span> vs ${game.homeTeam.Name}`
+        if (scores[game.id] && scores[game.id].awayScore) {
+          str += ` <span class='small'>(${scores[game.id].awayScore || 0} - ${scores[game.id].homeScore || 0})</span></div>`
         } else {
           str += '</div>'
         }

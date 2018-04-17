@@ -4,27 +4,48 @@ import {API_PASSWORD} from './secrets'
 import './App.css';
 
 class App extends Component {
-  
-  getDatesForWeek(startDate, endDate) {
+
+  constructor() {
+    super()
+
+    this.state = {
+        filter: 'this'
+    }
+
+    this.handleFilterChange = this.handleFilterChange.bind(this)
+  }
+
+  getDatesForWeek(startDate, endDate, week) {
     let weekArray = []
     let currentDay = new Date(startDate)
     let today = new Date()
-    while (currentDay < today) {
+    let end = week === 'this' ? today : endDate
+
+    while (currentDay <= end) {
       let dateString = helpers.convertDateToQueryString(currentDay)
       weekArray.push(dateString)
       currentDay = new Date(currentDay.getTime() + 86400000);
     }
-    
+
     // let lastDay = helpers.convertDateToQueryString(endDate)
 
     // weekArray.push(lastDay)
-    return weekArray.slice(0,-1)
+    if (week === 'this') {
+        weekArray = weekArray.slice(0,-1)
+    }
+
+    return weekArray
   }
 
-  fetchCurrentWeekSeries() {
-    let today = new Date()
-    let startDate = helpers.determineStartOfWeek(today)
-    let endDate = helpers.determineEndOfWeek(today)
+  fetchCurrentWeekSeries(week) {
+    let day = new Date()
+    if (week === 'last') {
+        day = new Date(day.getTime() - (86400000*7))
+    } else if (week === 'next') {
+        day = new Date(day.getTime() + (86400000*7))
+    }
+    let startDate = helpers.determineStartOfWeek(day)
+    let endDate = helpers.determineEndOfWeek(day)
     let url = `https://api.mysportsfeeds.com/v1.2/pull/mlb/2018-regular/full_game_schedule.json?date=from-${helpers.convertDateToQueryString(startDate)}-to-${helpers.convertDateToQueryString(endDate)}`
     let scoresMap = {};
     let encryptedCredentials = btoa(`dtfreemn:${API_PASSWORD}`)
@@ -42,8 +63,8 @@ class App extends Component {
         window.games = games.fullgameschedule.gameentry
       })
       .then(() => {
-        let week = this.getDatesForWeek(startDate, endDate);
-        window.scores = [];
+        let week = this.getDatesForWeek(startDate, endDate, 'last');
+        window.scores = {};
         let fetchThem = week.map(date => {
           return this.fetchScores(date)
         })
@@ -54,6 +75,7 @@ class App extends Component {
         promiseArray.forEach(scoreboard => {
           scoreboard.scoreboard.gameScore.forEach(game => {
             scoresMap[game.game.ID] = {'awayScore': game.awayScore, 'homeScore': game.homeScore}
+            window.scores[game.game.ID] = scoresMap[game.game.ID]
           })
         })
         helpers.processGames(window.games, scoresMap)
@@ -73,14 +95,25 @@ class App extends Component {
     }).then(resp => resp.json())
   }
 
+  handleFilterChange(event) {
+    let filter = event.target.value
+    this.setState({filter})
+    this.fetchCurrentWeekSeries(filter)
+  }
+
 
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <h1 className="App-title">Soltman's Survivor League</h1>
+          <select onChange={this.handleFilterChange}>
+            <option value="this">This Week</option>
+            <option value="last">Last Week</option>
+            <option value="next">Next Week</option>
+          </select>
         </header>
-          {this.fetchCurrentWeekSeries()}
+          {this.fetchCurrentWeekSeries(this.state.filter)}
         <div className='container' id="games"></div>
       </div>
     );
