@@ -117,11 +117,26 @@ function processGames(games, scores) {
   document.getElementById('games').innerHTML = gameDivs
 }
 
+function makeScoresMap(scoresArray) {
+  let scoresMap = {};
+  
+  if (scoresArray.length) {
+    scoresArray.forEach(scoreboard => {
+      scoreboard.scoreboard.gameScore.forEach(game => {
+        scoresMap[game.game.ID] = {'awayScore': game.awayScore, 'homeScore': game.homeScore}
+      })
+    })
+  }
+
+  return scoresMap
+}
+
 export const helpers = {
   determineStartOfWeek,
   determineEndOfWeek,
   convertDateToQueryString,
   makeTeamObjects,
   makeTeamSeries,
+  makeScoresMap,
   processGames
 }
