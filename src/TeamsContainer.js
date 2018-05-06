@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import {API_PASSWORD} from './secrets';
 import TeamsList from './TeamsList'
 import WeekSelect from './WeekSelect'
+import LeagueStandingsContainer from './LeagueStandingsContainer'
 
 class TeamsContainer extends Component {
   constructor() {
@@ -10,7 +10,10 @@ class TeamsContainer extends Component {
     this.state = {
       games: [],
       scores: {},
-      filter: 'current'
+      standings: [],
+      filter: 'current',
+      showLeagueStandings: false,
+      loading: true
     };
   
     this.handleRender = this.handleRender.bind(this);
@@ -20,6 +23,9 @@ class TeamsContainer extends Component {
     this.determineStartOfWeek = this.determineStartOfWeek.bind(this);
     this.determineEndOfWeek = this.determineEndOfWeek.bind(this);
     this.convertDateToQueryString = this.convertDateToQueryString.bind(this);
+    this.fetchAndSetLeagueStandings = this.fetchAndSetLeagueStandings.bind(this);
+    this.determineContainerToRender = this.determineContainerToRender.bind(this);
+    this.toggleSeriesAndStandings = this.toggleSeriesAndStandings.bind(this);
   }
 
   componentDidMount() {
@@ -38,6 +44,7 @@ class TeamsContainer extends Component {
 
     this.fetchAndSetSelectedWeekSeriesToState(week);
     this.fetchSelectedWeekScoresAsPromises(startDate, endDate, week).then(this.setScoresToState);
+    this.fetchAndSetLeagueStandings()
   }
 
   setScoresToState(promiseArray) {
@@ -117,7 +124,11 @@ class TeamsContainer extends Component {
   }
 
   handleFilterChange(filter) {
-    this.setState({filter}, this.handleRender)
+    this.setState({loading: true, games: []}, () => {
+      setTimeout(() => {
+        this.setState({filter, loading: false}, this.handleRender)
+      }, 1250)
+    })
   }
 
   determineStartOfWeek(today) {
@@ -148,11 +159,49 @@ class TeamsContainer extends Component {
     return day
   }
 
+  fetchAndSetLeagueStandings() {
+    return fetch(`https://api.mysportsfeeds.com/v1.2/pull/mlb/2018-regular/overall_team_standings.json?teamstats=W,L,RF,RA`, {
+      headers: {
+        'Authorization': `Basic ZHRmcmVlbW46ZG9ubmllMzE=`
+      },
+      dataType: 'json',
+      async: false,
+      data: 'fetched'
+    }).then(resp => resp.json()).then(data => {
+      this.setState({standings: data['overallteamstandings']['teamstandingsentry']})
+    })
+  }
+
+  determineContainerToRender() {
+    if (this.state.loading || this.state.games.lenght === 0) {
+      setTimeout(() => {
+        this.setState({loading: false})
+      }, 1250)
+      return <div><img className='loader' src={require('./baseball-loader.gif')} /></div>
+    }
+    if (!this.state.showLeagueStandings) {
+      return (
+        <div>
+          <WeekSelect filter={this.state.filter} handleChange={this.handleFilterChange}/>
+          <TeamsList games={this.state.games} scores={this.state.scores}/>
+        </div>
+      )
+    } else {
+      return (
+        <LeagueStandingsContainer standings={this.state.standings}/>
+      )
+    }
+  }
+
+  toggleSeriesAndStandings() {
+    this.setState({showLeagueStandings: !this.state.showLeagueStandings})
+  }
+
   render() {
     return (
       <div className='grey'>
-        <WeekSelect filter={this.state.filter} handleChange={this.handleFilterChange}/>
-        <TeamsList games={this.state.games} scores={this.state.scores}/>
+        <button onClick={this.toggleSeriesAndStandings}>Show Me {!this.state.showLeagueStandings ? 'Current MLB Standings' : 'Weekly Series'}</button>
+        {this.determineContainerToRender()}
       </div>
     )
   }

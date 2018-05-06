@@ -1,5 +1,4 @@
 import React from 'react';
-import {helpers} from './helpers'
 import Team from './Team'
 
 const TeamsList = (props) => {
@@ -20,6 +19,7 @@ const TeamsList = (props) => {
       }
       
       if (
+          typeof scores !== 'undefined' &&
           typeof scores[game.id] !== 'undefined' &&
           typeof scores[game.id].awayScore !== 'undefined' &&
           typeof scores[game.id].homeScore !== 'undefined'
@@ -38,7 +38,7 @@ const TeamsList = (props) => {
   }
 
   const renderTeams = (games, scores) => {
-    if (!games.length || !Object.keys(scores).length) return
+    if (!games.length) return
 
     let teamEnum = combineTeamsGamesAndScores(games, scores)
     let teams = Object.keys(teamEnum).map(team => <Team key={team} info={teamEnum[team]} />)

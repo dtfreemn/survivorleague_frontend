@@ -1,5 +1,4 @@
 import React from 'react';
-import {helpers} from './helpers'
 import Game from './Game'
 
 const Team = (props) => {
@@ -15,7 +14,7 @@ const Team = (props) => {
   }
 
   const createLogoLink = info => {
-    return <a href={`http://www.espn.com/mlb/team/_/name/${info.abbr.toLowerCase()}`} target='_blank'><img className='logo' src={`http://a.espncdn.com/combiner/i?img=/i/teamlogos/mlb/500/${info.abbr.toLowerCase()}.png&h=150&w=150`}/></a>
+    return <a href={`http://www.espn.com/mlb/team/_/name/${info.abbr.toLowerCase()}`} target='_blank'><img className='logo' src={`http://a.espncdn.com/combiner/i?img=/i/teamlogos/mlb/500/${info.abbr.toLowerCase()}.png&h=150&w=150`} alt={info.abbr}/></a>
   }
 
   return (
